@@ -29,7 +29,7 @@ rear_posi = zeros(n,2);% x y
 %%
 %Initial condition
 pose(1,1) = 0.0;    pose(1,2) = 0.0;     pose(1,3) = pi/2; 
-v(1,1) = 10;        v(1,2) = 0.0;        v(1,3) = 1.25; 
+v(1,1) = 10;        v(1,2) = 1.0;        v(1,3) = 1.25; 
 delta(1,1) = 80*pi/180; 
 a(1,1) = 0.0; 
 Fy(1,1)=-455.0;     Fy(1,2)=-455.0;
@@ -38,9 +38,9 @@ Fy(1,1)=-455.0;     Fy(1,2)=-455.0;
 %コースを導入
 skidpad;
 
-figure
-plot(path(:,1),path(:,2))
-hold on
+% figure
+% plot(path(:,1),path(:,2))
+% hold on
 %%
 %frameの条件
 
@@ -103,23 +103,28 @@ for i= 1:n-1
         a(i+1) = 0;
     end
     
-   
+    %　スリップアングル計算
+    beta(i) = atan2(v(i+1,2), v(i+1,1));
+    betaf(i) = beta(i) + lf*v(i+1,3)/sqrt(v(i+1,1)^2+v(i+1,2)^2) - delta(i+1,1);
+    betar(i) = beta(i) - lr*v(i+1,3)/sqrt(v(i+1,1)^2+v(i+1,2)^2);
+    betaf(i) = betaf(i)*180/pi;
+    betar(i) = betar(i)*180/pi;
     %タイヤ力
     Fy(i+1,1) = -Cf*(atan2(v(i+1,2),v(i+1,1)) + lf*v(i+1,3)/v(i+1,1) - delta(i+1,1));
     Fy(i+1,2) = -Cr*(atan2(v(i+1,2),v(i+1,1)) - lr*v(i+1,3)/v(i+1,1));
     
     %逐次プロット
-    plotTrVec = [pose(i+1,1:2)'; 0];
-    plotRot = axang2quat([0 0 1 pose(i+1,3)]);
-    plotTransforms(plotTrVec', plotRot, "MeshFilePath", "groundvehicle.stl", "Parent", gca, "View","2D", "FrameSize", frameSize);
-    
-    xlim([-15 35])
-    ylim([-20 20])
-    axis equal
-    
-    
-   
-    waitfor(vizRate);
+%     plotTrVec = [pose(i+1,1:2)'; 0];
+%     plotRot = axang2quat([0 0 1 pose(i+1,3)]);
+%     plotTransforms(plotTrVec', plotRot, "MeshFilePath", "groundvehicle.stl", "Parent", gca, "View","2D", "FrameSize", frameSize);
+%     
+%     xlim([-15 35])
+%     ylim([-20 20])
+%     axis equal
+%     
+%     
+%    
+%     waitfor(vizRate);
     
   
      t(i+1,1)= t(i,1)+dt;
@@ -146,3 +151,5 @@ end
 %%
 
 t_end
+plot(betar(:))
+hold on
